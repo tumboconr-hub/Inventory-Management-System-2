@@ -1,0 +1,318 @@
+
+// =========================
+// INVENTORY MANAGEMENT SYSTEM - GOOGLE APPS SCRIPT
+// =========================
+// SHEET NAMES:
+// Entry
+// Database
+// Log
+//
+// BUTTONS:
+// Search
+// Add New
+// Update
+// Clear
+//
+// =========================
+// ENTRY FORM CELLS
+// =========================
+//
+// C4 = Item Name
+
+// E4 = Item Code
+//
+// C5 = Purchase Price
+// E5 = Quantity
+//
+// C6 = Purchase Date
+// E6 = Serial Number
+//
+// C7 = Category
+// E7 = Condition
+//
+// C8 = Location
+// E8 = Assigned To
+//
+// C9:E9 = Remarks
+//
+// =========================
+// DATABASE COLUMNS
+// =========================
+//
+// A = Item Code
+
+// B = Item Name
+// C = Purchase Price
+// D = Quantity
+// E = Purchase Date
+// F = Serial Number
+// G = Category
+// H = Condition
+// I = Location
+// J = Assigned To
+// K = Remarks
+// L = Date Created
+//
+// =========================
+
+function addNew() {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var entrySheet = ss.getSheetByName("Entry");
+
+  var dbSheet = ss.getSheetByName("Database");
+  var logSheet = ss.getSheetByName("Log");
+
+  // GET VALUES
+  var itemName = entrySheet.getRange("C4").getValue();
+  var itemCode = entrySheet.getRange("E4").getValue();
+
+  var purchasePrice = entrySheet.getRange("C5").getValue();
+  var quantity = entrySheet.getRange("E5").getValue();
+
+  var purchaseDate = entrySheet.getRange("C6").getValue();
+  var serialNumber = entrySheet.getRange("E6").getValue();
+
+  var category = 
+
+entrySheet.getRange("C7").getValue();
+  var condition = entrySheet.getRange("E7").getValue();
+
+  var location = entrySheet.getRange("C8").getValue();
+  var assignedTo = entrySheet.getRange("E8").getValue();
+
+  var remarks = entrySheet.getRange("C9").getValue();
+
+  // VALIDATION
+  if(itemCode == ""){
+    SpreadsheetApp.getUi().alert("Item Code is required!");
+    return;
+  }
+
+  // CHECK DUPLICATE ITEM CODE
+  var lastRow = dbSheet.getLastRow();
+
+
+  if(lastRow > 1){
+
+    var codes = dbSheet.getRange(2,1,lastRow-1,1).getValues();
+
+    for(var i=0; i<codes.length; i++){
+
+      if(codes[i][0] == itemCode){
+
+        SpreadsheetApp.getUi().alert("Item Code already exists!");
+        return;
+
+      }
+
+    }
+
+  }
+
+  // SAVE DATA
+  dbSheet.appendRow([
+    itemCode,
+    itemName,
+    purchasePrice,
+    quantity,
+    purchaseDate,
+    serialNumber,
+    category,
+    condition,
+    location,
+    assignedTo,
+    remarks,
+    new Date()
+  ]);
+
+  // LOG
+  logSheet.appendRow([
+    new Date(),
+    "ADD NEW",
+    itemCode,
+
+    itemName
+  ]);
+
+  SpreadsheetApp.getUi().alert("New Item Added Successfully!");
+
+}
+
+
+// =========================
+// SEARCH FUNCTION
+// =========================
+
+function searchRecord(){
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var entrySheet = ss.getSheetByName("Entry");
+  var dbSheet = 
+
+ss.getSheetByName("Database");
+
+  var itemCode = entrySheet.getRange("E4").getValue();
+
+  if(itemCode == ""){
+
+    SpreadsheetApp.getUi().alert("Enter Item Code to Search!");
+    return;
+
+  }
+
+  var data = dbSheet.getDataRange().getValues();
+
+  for(var i=1; i<data.length; i++){
+
+    if(data[i][0] == itemCode){
+
+      
+
+entrySheet.getRange("C4").setValue(data[i][1]);
+      entrySheet.getRange("C5").setValue(data[i][2]);
+      entrySheet.getRange("E5").setValue(data[i][3]);
+      entrySheet.getRange("C6").setValue(data[i][4]);
+      entrySheet.getRange("E6").setValue(data[i][5]);
+      entrySheet.getRange("C7").setValue(data[i][6]);
+      entrySheet.getRange("E7").setValue(data[i][7]);
+      
+
+entrySheet.getRange("C8").setValue(data[i][8]);
+      entrySheet.getRange("E8").setValue(data[i][9]);
+      entrySheet.getRange("C9").setValue(data[i][10]);
+
+      SpreadsheetApp.getUi().alert("Record Found!");
+
+      return;
+
+    }
+
+  }
+
+  SpreadsheetApp.getUi().alert("No Record Found!");
+
+}
+
+
+// =========================
+// UPDATE FUNCTION
+// =========================
+
+function updateRecord(){
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var entrySheet = ss.getSheetByName("Entry");
+  var dbSheet = ss.getSheetByName("Database");
+  var logSheet = ss.getSheetByName("Log");
+
+  var itemCode = entrySheet.getRange("E4").getValue();
+
+  var data = dbSheet.getDataRange().getValues();
+
+  for(var i=1; i<data.length; i++){
+
+    if(data[i][0] == itemCode){
+
+      dbSheet.getRange(i+1,2).setValue(entrySheet.getRange("C4").getValue());
+      dbSheet.getRange(i+1,3).setValue(entrySheet.getRange("C5").getValue());
+      dbSheet.getRange(i+1,4).setValue(entrySheet.getRange("E5").getValue());
+      dbSheet.getRange(i+1,5).setValue(entrySheet.getRange("C6").getValue());
+      dbSheet.getRange(i+1,6).setValue(entrySheet.getRange("E6").getValue());
+      dbSheet.getRange(i+1,7).setValue(entrySheet.getRange("C7").getValue());
+      dbSheet.getRange(i+1,8).setValue(entrySheet.getRange("E7").getValue());
+      dbSheet.getRange(i+1,9).setValue(entrySheet.getRange("C8").getValue());
+      dbSheet.getRange(i+1,10).setValue(entrySheet.getRange("E8").getValue());
+      dbSheet.getRange(i+1,11).setValue(entrySheet.getRange("C9").getValue());
+
+      logSheet.appendRow([
+        new Date(),
+        "UPDATED",
+        itemCode
+
+      ]);
+
+      SpreadsheetApp.getUi().alert("Record Updated!");
+
+      return;
+
+    }
+
+  }
+
+  SpreadsheetApp.getUi().alert("Item Code not found!");
+
+}
+
+
+// =========================
+// CLEAR FORM
+// =========================
+
+function clearForm(){
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var entrySheet = ss.getSheetByName("Entry");
+
+  entrySheet.getRange("C4").clearContent();
+  entrySheet.getRange("E4").clearContent();
+
+  entrySheet.getRange("C5").clearContent();
+  entrySheet.getRange("E5").clearContent();
+
+  entrySheet.getRange("C6").clearContent();
+  entrySheet.getRange("E6").clearContent();
+
+  entrySheet.getRange("C7").clearContent();
+  entrySheet.getRange("E7").clearContent();
+
+  entrySheet.getRange("C8").clearContent();
+
+  entrySheet.getRange("E8").clearContent();
+
+  entrySheet.getRange("C9:E9").clearContent();
+
+}
+
+
+// =========================
+// AUTO GENERATE ITEM CODE
+// =========================
+
+function generateItemCode(){
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dbSheet = ss.getSheetByName("Database");
+  var entrySheet = ss.getSheetByName("Entry");
+
+
+  var lastRow = dbSheet.getLastRow();
+
+  var nextNumber = lastRow;
+
+  var itemCode = "AV" + Utilities.formatString("%05d", nextNumber);
+
+  entrySheet.getRange("E4").setValue(itemCode);
+
+}
+
+
+// =========================
+// CUSTOM MENU 
+// =========================
+
+function onOpen(){
+
+  SpreadsheetApp.getUi()
+    .createMenu("Inventory System")
+    .addItem("Add New", "addNew")
+    .addItem("Search", "searchRecord")
+    .addItem("Update", "updateRecord")
+    .addItem("Clear", "clearForm")
+    .addToUi();
+
+}
